@@ -1,0 +1,23 @@
+from flask import Flask, request, jsonify
+import numpy as np
+import tensorflow as tf
+from sklearn.preprocessing import StandardScaler
+app = Flask(__name__)
+# Load the trained model
+model = tf.keras.models.load_model("autoencoder_model.h5")
+scaler = StandardScaler()
+# Define an API endpoint for predictions
+@app.route('/predict', methods=['POST'])
+def predict():
+ # Get input data from the request
+ data = request.get_json()
+ input_data = np.array(data['input'])
+ scaled_input = scaler.transform(input_data)
+ 
+ # Use the model to make predictions
+ encoded_data = model.predict(scaled_input)
+ 
+ # Return the results
+ return jsonify({'encoded_data': encoded_data.tolist()})
+if __name__ == '__main__':
+ app.run(debug=True)
